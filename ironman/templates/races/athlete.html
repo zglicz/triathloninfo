@@ -1,0 +1,10 @@
+<div>
+	<a href="{% url 'ironman:index' %}?search_type=athlete&q={{ race_result.athlete_name }}">
+		{{ race_result.athlete_name }}
+	</a>
+	<br />
+	<span>	
+		{{ race_result.sex }}
+		{{ race_result.age_group }}
+	</span>
+</div>

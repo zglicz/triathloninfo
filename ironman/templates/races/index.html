@@ -1,0 +1,33 @@
+{% extends 'races/base_generic.html' %}
+
+{% block content %}
+
+<ul>
+{% for race in races %}
+	<li>
+		{% include "races/race.html" with race=race only %}
+	</li>
+{% endfor %}
+</ul>
+
+{% if race_results %}
+	<table>
+		<tr>
+			<th>Athlete</th>
+			<th>Time</th>
+			<th>Race</th>
+		</tr>
+		{% for race_result in race_results %}
+		<tr>
+			<td>
+				{% include "races/athlete.html" with race_result=race_result %}
+			</td>
+			<td>{{ race_result.finish_time }}</td>
+			<td>
+				{% include "races/race.html" with race=race_result.race only %}
+			</td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endif %}
+{% endblock %}
