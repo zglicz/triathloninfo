@@ -1,8 +1,13 @@
 from django import forms
 from .models import Race, RaceResult
+from django.forms import ModelChoiceField
+
+class RaceModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return str(obj.date.year)
 
 class RaceFilterForm(forms.Form):
-	race_id = forms.ModelChoiceField(
+	race_id = RaceModelChoiceField(
 		queryset=Race.objects.none(),
 		widget=forms.Select(attrs={"onChange": 'submit()', 'class': 'form-control'}),
 		label='',

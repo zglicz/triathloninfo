@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from datetime import datetime, timedelta
+from .constants import WEBDRIVER_VERSION
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Race(models.Model):
     DISTANCES = Choices(('half-ironman', _('IRONMAN 70.3')),
@@ -10,6 +12,9 @@ class Race(models.Model):
     title = models.CharField(max_length=255)
     date = models.DateField()
     location = models.CharField(max_length=255)
+    version = models.SmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(WEBDRIVER_VERSION)])
 
     def get_computed_race_data(self):
         age_group_list = [age[0] for age in RaceResult.AGE_GROUPS]
@@ -80,6 +85,13 @@ class RaceResult(models.Model):
 
     def __str__(self):
             return '{0} - {1}'.format(self.athlete_name, self.finish_time)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['race_id', 'athlete_name', 'finish_time'],
+                name="unique_result"),
+        ]
 
 
 class ComputedRaceData(models.Model):

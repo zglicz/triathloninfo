@@ -6,7 +6,7 @@ from urllib.parse import quote, urlsplit
 from urllib.request import urlopen, HTTPError, Request
 from .models import ComputedRaceData, Race, RaceResult
 import socket
-
+from .constants import WEBDRIVER_VERSION
 
 class Webdriver:
 
@@ -108,37 +108,58 @@ class Webdriver:
                 if created:
                     self.race.location = self.race_location
                     self.race.save()
+
+                if self.race.version == WEBDRIVER_VERSION:
+                    print(self.race, 'already scraped and in version', self.race.version)
+                else:
+                    if not created:
+                        # we need to drop all race results
+                        deleted_results = RaceResult.objects.filter(race_id = self.race.id).delete()
+                        print('Deleted ', deleted_results[0], ' entries')
+                    ok = True
+                    all_athlete_list = []
                     for gender in gender_list:
+                        if not ok:
+                            break;
                         for age_group in age_group_list:
                             self.age_group = age_group
                             self.gender = gender
                             data_url = '{0}race={1}&rd={2}&sex={3}&agegroup={4}&ps=2000'.format(
                                 self.ironman_html_url, race_url_name, race_date, gender, age_group)
-                            self.scrape_gender_and_age_group(data_url)
-                    ComputedRaceData.objects.bulk_create(self.race.get_computed_race_data())
-                    print('Computed race results created for race ', self.race)
-
-                else:
-                    print(self.race, 'already scraped')
+                            athlete_list = self.scrape_gender_and_age_group(data_url)
+                            if athlete_list == None:
+                                print('athlete list None for', data_url)
+                                ok = False
+                                break
+                            all_athlete_list.extend(athlete_list)
+                    if ok:
+                        RaceResult.objects.bulk_create(all_athlete_list)
+                        ComputedRaceData.objects.bulk_create(self.race.get_computed_race_data())
+                        print('Computed for race', self.race, 'results:', len(all_athlete_list))
+                        self.race.version = WEBDRIVER_VERSION
+                        self.race.save()
+                    else:
+                        print('Failed for ', self.race)
 
     def scrape_gender_and_age_group(self, data_url):
-        table_body = self.get_table_from_url(data_url)
+        table_body, exc = self.get_table_from_url(data_url)
         if table_body:
-            athlete_list = [self.create_athlete_data(row) for row in table_body.find_all("tr")]
-            RaceResult.objects.bulk_create(athlete_list)
-            print('Records successfully created for ', data_url)
+            return [self.create_athlete_data(row) for row in table_body.find_all("tr")]
+        if not exc:
+            return []
+        return None
 
     def get_table_from_url(self, url):
         try:
             response = self.urlopen_custom(url).decode('utf8')  
         except socket.timeout:
             print('timeout for: ', url)
-            return None
+            return None, True
         html = json.loads(response)['body']['update']['html'][0]['value']
         if 'No Results Found' in html:
-            return None
+            return None, False
         soup = BeautifulSoup(html, 'lxml')
-        return soup.find('tbody')
+        return soup.find('tbody'), False
 
     def create_athlete_data(self, row):
         keys = ['athlete_name', 'athlete_country', 'division_rank',
