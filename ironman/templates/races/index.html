@@ -2,32 +2,11 @@
 
 {% block content %}
 
-<ul>
-{% for race in races %}
-	<li>
-		{% include "races/race.html" with race=race only %}
-	</li>
-{% endfor %}
-</ul>
+{% if races %}
+	{% include "races/races.html" with races=races only %}
+{% endif %}
 
 {% if race_results %}
-	<table>
-		<tr>
-			<th>Athlete</th>
-			<th>Time</th>
-			<th>Race</th>
-		</tr>
-		{% for race_result in race_results %}
-		<tr>
-			<td>
-				{% include "races/athlete.html" with race_result=race_result %}
-			</td>
-			<td>{{ race_result.finish_time }}</td>
-			<td>
-				{% include "races/race.html" with race=race_result.race only %}
-			</td>
-		</tr>
-	{% endfor %}
-	</table>
+	{% include "races/athletes.html" with race_results=race_results only %}
 {% endif %}
 {% endblock %}
