@@ -3,13 +3,19 @@
 {% block content %}
 <h1>{% include "races/race.html" with race=race %}</h1>
 
-<form method="GET" action="{% url 'ironman:race' race.id%}">
-	{{ race_filter_form }}
+<form class="pb-3" method="GET" action="{% url 'ironman:race' race.id%}">
+	<div class="form-row">
+		{% for field in race_filter_form.visible_fields %}
+			<div class="col">
+				{{ field }}
+			</div>
+		{% endfor %}
+	</div>
 </form>
 
-<table>
-	<tr>
-		<th />
+<table class="table table-hover">
+	<thead>
+		<th>#</th>
 		<th>Name</th>
 		<th>Div.</th>
 		<th>Gen.</th>
@@ -18,7 +24,7 @@
 		<th>Bike</th>
 		<th>Run</th>
 		<th>Time</th>
-	</tr>
+	</thead>
 {% for race_result in race_results %}
 	<tr>
 		<td>{{ forloop.counter }}</td>
