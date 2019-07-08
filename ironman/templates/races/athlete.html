@@ -1,5 +1,5 @@
 <div>
-	<a href="{% url 'ironman:index' %}?search_type=athlete&q={{ race_result.athlete_name }}">
+	<a href="{% url 'ironman:index' %}?search_type=athlete&q={{ race_result.athlete_name }}&exact=1">
 		{{ race_result.athlete_name }}
 	</a>
 	<br />

@@ -1,0 +1,7 @@
+<ul>
+{% for race in races %}
+	<li>
+		{% include "races/race.html" with race=race only %}
+	</li>
+{% endfor %}
+</ul>

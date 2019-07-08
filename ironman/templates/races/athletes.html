@@ -1,0 +1,30 @@
+<table>
+	<tr>
+		<th>Athlete</th>
+		<th>Div.</th>
+		<th>Gen.</th>
+		<th>Ovr.</th>
+		<th>Swim</th>
+		<th>Bike</th>
+		<th>Run</th>
+		<th>Time</th>
+		<th>Race</th>
+	</tr>
+	{% for race_result in race_results %}
+	<tr>
+		<td>
+			{% include "races/athlete.html" with race_result=race_result %}
+		</td>
+		<td>{{ race_result.division_rank }}</td>
+		<td>{{ race_result.gender_rank }}</td>
+		<td>{{ race_result.overall_rank }}</td>
+		<td>{{ race_result.swim_time }}</td>
+		<td>{{ race_result.bike_time }}</td>
+		<td>{{ race_result.run_time }}</td>
+		<td>{{ race_result.finish_time }}</td>
+		<td>
+			{% include "races/race.html" with race=race_result.race only %}
+		</td>
+	</tr>
+	{% endfor %}
+</table>

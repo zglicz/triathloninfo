@@ -22,8 +22,12 @@ class IndexView(generic.TemplateView):
 				.order_by('-date')
 			context['races'] = races
 		else:
+			if self.request.GET.get('exact'):
+				filter = Q(athlete_name=q)
+			else:
+				filter = Q(athlete_name__contains=q) if q else Q() 
 			race_results = RaceResult.objects \
-				.filter(Q(athlete_name__contains=q) if q else Q()) \
+				.filter(filter) \
 				.order_by('-race__date') \
 				[:50]
 			context['race_results'] = race_results
