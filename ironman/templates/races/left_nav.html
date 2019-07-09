@@ -11,6 +11,11 @@
 					Athletes
 				</a>
 			</li>
+			<li class="nav-item">
+				<a class="nav-link {% if search_type == 'stats' %}active{% endif %}" href="{% url 'ironman:stats' %}?search_type=stats">
+					Stats
+				</a>
+			</li>
 		</ul>
 	</div>
 </nav>

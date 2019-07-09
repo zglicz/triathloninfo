@@ -1,0 +1,18 @@
+{% extends 'races/base_generic.html' %}
+
+{% block content %}
+
+<div class="container mt-3">
+	<dl>
+		<dt>Number of races:</dt>
+		<dd>{{ race_counts }}</dd>
+		<dt>Number of participants:</dt>
+		<dd>{{ participant_counts }}</dd>
+		<dt>Race by version count</dt>
+		<dd>{{ race_by_version }}</dd>
+		<dt>Races without results</dt>
+		<dd>{{ bad_races }}</dd>
+	</dl>
+</div>
+
+{% endblock %}

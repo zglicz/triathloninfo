@@ -1,4 +1,5 @@
 {% extends 'races/base_generic.html' %}
+{% load sortable_column %}
 
 {% block content %}
 <h1>{% include "races/race.html" with race=race %}</h1>
@@ -16,14 +17,14 @@
 <table class="table table-hover">
 	<thead>
 		<th>#</th>
-		<th>Name</th>
-		<th>Div.</th>
-		<th>Gen.</th>
-		<th>Ovr.</th>
-		<th>Swim</th>
-		<th>Bike</th>
-		<th>Run</th>
-		<th>Time</th>
+		{% sortable_column request=request property="athlete_name" title="Name" %}
+		{% sortable_column request=request property="division_rank" title="Div." %}
+		{% sortable_column request=request property="gender_rank" title="Gen." %}
+		{% sortable_column request=request property="overall_rank" title="Ovr." %}
+		{% sortable_column request=request property="swim_time" title="Swim" %}
+		{% sortable_column request=request property="bike_time" title="Bike" %}
+		{% sortable_column request=request property="run_time" title="Run" %}
+		{% sortable_column request=request property="finish_time" title="Time" %}
 	</thead>
 {% for race_result in race_results %}
 	<tr>

@@ -2,11 +2,11 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Race, RaceResult
 from .forms import RaceFilterForm
-from django.db.models import Q
+from django.db.models import Q, Count, F
 from django.views import generic
 from django.utils.http import urlencode
 from django.urls import reverse
-
+from .constants import WEBDRIVER_VERSION
 
 
 class IndexView(generic.TemplateView):
@@ -54,6 +54,8 @@ class RaceView(generic.TemplateView):
 		race_id = kwargs['race_id']
 		age_group = self.request.GET.get('age_group')
 		sex = self.request.GET.get('sex')		
+		sort = self.request.GET.get('sort', 'finish_time')
+		order = self.request.GET.get('order', 'asc')
 		race = get_object_or_404(Race, pk=race_id)
 		filter_obj = Q(race_id=race.id) & Q(finish_time__isnull=False)
 		if age_group:
@@ -62,10 +64,25 @@ class RaceView(generic.TemplateView):
 			filter_obj &= Q(sex=sex)
 		race_results = RaceResult \
 			.objects \
-			.filter(filter_obj) \
-			.order_by('finish_time')
+			.filter(filter_obj)
+		if order == 'asc':
+			race_results = race_results.order_by(F(sort).asc(nulls_last=True))
+		else:
+			race_results = race_results.order_by(F(sort).desc(nulls_last=True))
 		races_all_years = Race.objects.filter(title=race.title)
 		context['race_results'] = race_results
 		context['race'] = race
 		context['race_filter_form'] = RaceFilterForm(race, initial={'age_group': age_group, 'sex': sex, 'race_id': race.pk})
+		return context
+
+class StatsView(generic.TemplateView):
+	template_name = 'races/stats.html'
+
+	def get_context_data(self, *args, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['search_type'] = 'stats'
+		context['race_counts'] = Race.objects.all().values('distance').annotate(total=Count('distance'))
+		context['participant_counts'] = RaceResult.objects.all().values('race__distance').annotate(total=Count('race__distance'))
+		context['race_by_version'] = Race.objects.all().values('version').annotate(total=Count('version'))
+		context['bad_races'] = Race.objects.exclude(version=WEBDRIVER_VERSION)
 		return context

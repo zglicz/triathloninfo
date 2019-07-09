@@ -7,6 +7,7 @@ from urllib.request import urlopen, HTTPError, Request
 from .models import ComputedRaceData, Race, RaceResult
 import socket
 from .constants import WEBDRIVER_VERSION
+from iteration_utilities import unique_everseen, duplicates
 
 class Webdriver:
 
@@ -114,8 +115,10 @@ class Webdriver:
                 else:
                     if not created:
                         # we need to drop all race results
-                        deleted_results = RaceResult.objects.filter(race_id = self.race.id).delete()
-                        print('Deleted ', deleted_results[0], ' entries')
+                        deleted_results = RaceResult.objects.filter(race_id=self.race.id).delete()
+                        computed_results = ComputedRaceData.objects.filter(race_id=self.race.id).delete()
+                        print('Deleted', deleted_results[0], 'entries')
+                        print('Deleted', computed_results[0], 'computed results')
                     ok = True
                     all_athlete_list = []
                     for gender in gender_list:
@@ -133,6 +136,10 @@ class Webdriver:
                                 break
                             all_athlete_list.extend(athlete_list)
                     if ok:
+                        reps = [(athlete.athlete_name, athlete.finish_time, athlete.age_group) for athlete in all_athlete_list]
+                        dupes = list(unique_everseen(duplicates(reps)))
+                        if dupes:
+                            print('Dupes: ', dupes)
                         RaceResult.objects.bulk_create(all_athlete_list)
                         ComputedRaceData.objects.bulk_create(self.race.get_computed_race_data())
                         print('Computed for race', self.race, 'results:', len(all_athlete_list))
@@ -194,6 +201,11 @@ class Webdriver:
                           age_group=self.age_group,
                           sex=self.gender,
                           **athlete_dict)
-    def urlopen_custom(self, url):
-        req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        return urlopen(req, timeout = 30).read()
+    def urlopen_custom(self, url, retry_cnt = 3):
+        try:
+            req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            return urlopen(req, timeout = 30).read()
+        except socket.timeout as exc:
+            if retry_cnt > 0:
+                return self.urlopen_custom(url, retry_cnt - 1)
+            raise

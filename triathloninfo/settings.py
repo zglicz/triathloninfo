@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ironman.apps.IronmanConfig',
+    'chartjs',
+    'sortable_column',
+    'django_static_fontawesome',
 ]
 
 MIDDLEWARE = [
@@ -119,3 +122,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SORTABLE_COLUMN_SETTINGS = {
+  'class_name': 'sortable',
+  'icon': 'fas fa-sort',
+  'icon_asc':'fas fa-sort-up',
+  'icon_desc':'fas fa-sort-down',
+  'icon_placement': 'left',
+  'conf_by_css': False,
+}

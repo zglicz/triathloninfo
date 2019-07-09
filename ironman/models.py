@@ -89,10 +89,9 @@ class RaceResult(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['race_id', 'athlete_name', 'finish_time'],
+                fields=['race_id', 'athlete_name', 'finish_time', 'age_group', 'overall_rank'],
                 name="unique_result"),
         ]
-
 
 class ComputedRaceData(models.Model):
     race = models.ForeignKey('Race', on_delete=models.CASCADE)
